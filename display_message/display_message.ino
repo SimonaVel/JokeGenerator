@@ -4,6 +4,17 @@
 *********/
 
 #include <LiquidCrystal_I2C.h>
+// global variables:
+// for the button:
+int LED_PIN = LED_BUILTIN;  // Use the built-in LED pin
+int BUTTON_PIN = 17;         // Define the pin for the pushbutton
+
+
+void setUpButton(int button_value = 17) {
+  BUTTON_PIN = button_value;         // Define the pin for the pushbutton
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP);   // Initialize pushbutton pin as an input with internal pull-up resistor
+}
 
 void setUpDisplayMessage() {
   // set the LCD number of columns and rows
@@ -24,11 +35,26 @@ void setUpDisplayMessage() {
   lcd.print("Press the button");
 }
 
-
 void setup(){
+  Serial.begin(9600);
+  delay(1000);
+  Serial.println("Before setting up the display.");
+
   setUpDisplayMessage();
+  Serial.println("Display set up.");
+
+  Serial.println("Setting up the button.");
+  setUpButton(17);
 }
 
 void loop(){
-  
+  int buttonState = HIGH;      // Initialize button state
+  int lastButtonState = HIGH;  // Initialize last button state
+  // Read the current state of the pushbutton
+  buttonState = digitalRead(BUTTON_PIN);
+  // if the button is pressed and its previous state was HIGH
+  if (buttonState == LOW && lastButtonState == HIGH) {  // Check if the button state has changed from HIGH to LOW (button pressed)
+    Serial.println("Button pressed");
+    delay(500);
+  }
 }
