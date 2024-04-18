@@ -13,13 +13,11 @@ WiFiServer server(80);
 // for the jokes
 char* jokeAPI = "https://v2.jokeapi.dev/joke/Any?safe-mode";
 
-
-// It sets up a button on the breadboard
 void setUpButton(int button_value = 17) {
   BUTTON_PIN = button_value;         // Define the pin for the pushbutton
   pinMode(BUTTON_PIN, INPUT_PULLUP);   // Initialize pushbutton pin as an input with internal pull-up resistor
 }
-// displays a message on a LCD
+
 void setUpDisplayMessage() {
   // set the LCD number of columns and rows
   int lcdColumns = 16;
@@ -39,7 +37,7 @@ void setUpDisplayMessage() {
   lcd.print("Press the button");
 }
 
-// Connects to Wi-Fi network with SSID and password
+// Connect to Wi-Fi network with SSID and password
 void connectToWifi(char* name, char* pass) {
   Serial.print("Connecting to ");
   Serial.println(name);
@@ -55,7 +53,7 @@ void connectToWifi(char* name, char* pass) {
   server.begin();
 }
 
-// Fetches json data from an API
+// fetching jokes:
 void getDataFromAPI(char* jokeAPI) {
   HTTPClient http;
   Serial.print("Sending HTTP GET request to API: ");
@@ -81,10 +79,6 @@ void getDataFromAPI(char* jokeAPI) {
   }
 }
 
-String extractJoke(String json) {
-  return null;
-}
-
 void setup() {
   Serial.begin(9600);
   delay(1000);
@@ -95,7 +89,6 @@ void setup() {
   setUpButton(17);
   connectToWifi("Simona's Galaxy A51", "nnal8860");
 }
-
 
 void loop() {
   int buttonState = HIGH;      // Initialize button state
