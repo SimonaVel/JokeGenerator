@@ -1,18 +1,19 @@
-/*********
-  Rui Santos
-  Complete project details at https://randomnerdtutorials.com  
-*********/
-
 #include <LiquidCrystal_I2C.h>
-// global variables:
+// Load Wi-Fi library
+#include <WiFi.h>
+// for the API
+#include <HTTPClient.h>
+// GLOBAL VARIABLES:
 // for the button:
-int LED_PIN = LED_BUILTIN;  // Use the built-in LED pin
 int BUTTON_PIN = 17;         // Define the pin for the pushbutton
-
+// for the Wi-Fi
+// Set web server port number to 80
+WiFiServer server(80);
+// for the jokes
+char* jokeAPI = "https://v2.jokeapi.dev/joke/Any?safe-mode";
 
 void setUpButton(int button_value = 17) {
   BUTTON_PIN = button_value;         // Define the pin for the pushbutton
-
   pinMode(BUTTON_PIN, INPUT_PULLUP);   // Initialize pushbutton pin as an input with internal pull-up resistor
 }
 
@@ -35,16 +36,57 @@ void setUpDisplayMessage() {
   lcd.print("Press the button");
 }
 
+// Connect to Wi-Fi network with SSID and password
+void connectToWifi(char* name, char* pass){
+  Serial.print("Connecting to ");
+  Serial.println(name);
+  WiFi.begin(name, pass);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print("Connecting to Wi-Fi.");
+  }
+  Serial.println("\nConnected to Wi-Fi");
+   // Print local IP address and start web server
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  server.begin();
+}
+
+// fetching jokes:
+void getDataFromAPI(char* jokeAPI) {
+  HTTPClient http;
+  Serial.print("Sending HTTP GET request to API: ");
+  Serial.println(jokeAPI);
+
+  if (http.begin(jokeAPI)) {
+    int httpCode = http.GET();
+    if (httpCode > 0) {
+      if (httpCode == HTTP_CODE_OK) {
+        String payload = http.getString();
+        // Parse JSON response
+        // Example: Assuming the JSON response is {"type": "single", "joke": "This is a joke"}
+        // You need to parse this JSON and extract the relevant data
+        // Then, print or do whatever you want with the joke data
+        Serial.println(payload);
+      }
+    } else {
+      Serial.printf("HTTP GET failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+    http.end();
+  } else {
+    Serial.println("Unable to connect to server");
+  }
+}
+
 void setup(){
   Serial.begin(9600);
   delay(1000);
   Serial.println("Before setting up the display.");
-
   setUpDisplayMessage();
   Serial.println("Display set up.");
-
   Serial.println("Setting up the button.");
   setUpButton(17);
+  connectToWifi("Simona's Galaxy A51", "nnal8860");
 }
 
 void loop(){
@@ -54,7 +96,8 @@ void loop(){
   buttonState = digitalRead(BUTTON_PIN);
   // if the button is pressed and its previous state was HIGH
   if (buttonState == LOW && lastButtonState == HIGH) {  // Check if the button state has changed from HIGH to LOW (button pressed)
-    Serial.println("Button pressed");
+    Serial.println("Button pressed and now fetching joke...");
     delay(500);
+    getDataFromAPI(jokeAPI);
   }
 }
