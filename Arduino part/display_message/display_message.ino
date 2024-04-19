@@ -34,9 +34,9 @@ void setUpDisplayMessage() {
   // set cursor to first column, first row
   lcd.setCursor(0, 0);
   // print message
-  lcd.print("Another joke?");
-  lcd.setCursor(0, 1);
   lcd.print("Press the button");
+  lcd.setCursor(0, 1);
+  lcd.print("   for a joke");
 }
 
 // Connects to Wi-Fi network with SSID and password
@@ -56,7 +56,7 @@ void connectToWifi(char* name, char* pass) {
 }
 
 // Fetches json data from an API
-void getDataFromAPI(char* jokeAPI) {
+String getDataFromAPI(char* jokeAPI) {
   HTTPClient http;
   Serial.print("Sending HTTP GET request to API: ");
   Serial.println(jokeAPI);
@@ -70,19 +70,45 @@ void getDataFromAPI(char* jokeAPI) {
         // Example: Assuming the JSON response is {"type": "single", "joke": "This is a joke"}
         // You need to parse this JSON and extract the relevant data
         // Then, print or do whatever you want with the joke data
-        Serial.println(payload);
+        // Serial.println(payload);
+        return payload;
       }
     } else {
       Serial.printf("HTTP GET failed, error: %s\n", http.errorToString(httpCode).c_str());
+      return "";
     }
     http.end();
   } else {
     Serial.println("Unable to connect to server");
+    return "";
   }
 }
 
 String extractJoke(String json) {
-  return null;
+  // TEMPORARY
+  int start;
+  int end;
+  String extractedJoke;
+  // if the string contains "/"twopart/": " -> extract the two parts and return them connected
+  if((start = json.indexOf("\"type\": \"twopart\"")) != -1) {
+    // beginning of joke : "\"setup\": \""    end of joke : "\"flags\": {"
+    start = json.indexOf("\"setup\": \"") + 10;
+    end = json.indexOf("\"flags\": {") - 7;
+    // then just replace "" "delivery": " with an \n
+    extractedJoke = json.substring(start, end);
+    extractedJoke.replace("    \"delivery\": \"", "");
+    extractedJoke.replace("\",", "");
+
+    return extractedJoke;
+  }
+  // if it contains "/"type/": /"single/"" ->extract the single part and return it
+  else if(json.indexOf("\"type\": \"single\"") != -1) {
+    // get the substring from "\"joke\": \"" to "\",\n\"flags\""
+    start = json.indexOf("\"joke\": \"") + 9;
+    end = json.indexOf("\"flags\"") - 7;
+    return json.substring(start, end);
+  }
+  else return json;
 }
 
 void setup() {
@@ -106,6 +132,6 @@ void loop() {
   if (buttonState == LOW && lastButtonState == HIGH) {  // Check if the button state has changed from HIGH to LOW (button pressed)
     Serial.println("Button pressed and now fetching joke...");
     delay(500);
-    getDataFromAPI(jokeAPI);
+    Serial.println(extractJoke(getDataFromAPI(jokeAPI)));
   }
 }
