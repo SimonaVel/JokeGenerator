@@ -85,25 +85,18 @@ String getDataFromAPI(char* jokeAPI) {
 }
 
 String extractJoke(String json) {
-  // TEMPORARY
   int start;
   int end;
   String extractedJoke;
-  // if the string contains "/"twopart/": " -> extract the two parts and return them connected
   if((start = json.indexOf("\"type\": \"twopart\"")) != -1) {
-    // beginning of joke : "\"setup\": \""    end of joke : "\"flags\": {"
     start = json.indexOf("\"setup\": \"") + 10;
     end = json.indexOf("\"flags\": {") - 7;
-    // then just replace "" "delivery": " with an \n
     extractedJoke = json.substring(start, end);
     extractedJoke.replace("    \"delivery\": \"", "");
     extractedJoke.replace("\",", "");
-
     return extractedJoke;
   }
-  // if it contains "/"type/": /"single/"" ->extract the single part and return it
   else if(json.indexOf("\"type\": \"single\"") != -1) {
-    // get the substring from "\"joke\": \"" to "\",\n\"flags\""
     start = json.indexOf("\"joke\": \"") + 9;
     end = json.indexOf("\"flags\"") - 7;
     return json.substring(start, end);
