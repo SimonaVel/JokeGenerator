@@ -1,5 +1,5 @@
 #include <LiquidCrystal_I2C.h>
-// Load Wi-Fi library
+// Load Wi-Fi library for the web server
 #include <WiFi.h>
 // for the API
 #include <HTTPClient.h>
@@ -7,13 +7,19 @@
 // GLOBAL VARIABLES:
 // for the button:
 int BUTTON_PIN = 17;         // Define the pin for the pushbutton
-// for the Wi-Fi
-// Set web server port number to 80
-WiFiServer server(80);
 // for the jokes
 char* jokeAPI = "https://v2.jokeapi.dev/joke/Any?safe-mode";
 
-
+// for the web server
+WiFiServer server(80);
+// stores the HTTP request
+String header;
+// Current time
+unsigned long currentTime = millis();
+// Previous time
+unsigned long previousTime = 0;
+// Define timeout time in milliseconds (example: 2000ms = 2s)
+const long timeoutTime = 2000;
 // It sets up a button on the breadboard
 void setUpButton(int button_value = 17) {
   BUTTON_PIN = button_value;         // Define the pin for the pushbutton
@@ -38,7 +44,6 @@ void setUpDisplayMessage() {
   lcd.setCursor(0, 1);
   lcd.print("   for a joke");
 }
-
 // Connects to Wi-Fi network with SSID and password
 void connectToWifi(char* name, char* pass) {
   Serial.print("Connecting to ");
@@ -54,7 +59,6 @@ void connectToWifi(char* name, char* pass) {
   Serial.println(WiFi.localIP());
   server.begin();
 }
-
 // Fetches json data from an API
 String getDataFromAPI(char* jokeAPI) {
   HTTPClient http;
@@ -66,11 +70,6 @@ String getDataFromAPI(char* jokeAPI) {
     if (httpCode > 0) {
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
-        // Parse JSON response
-        // Example: Assuming the JSON response is {"type": "single", "joke": "This is a joke"}
-        // You need to parse this JSON and extract the relevant data
-        // Then, print or do whatever you want with the joke data
-        // Serial.println(payload);
         return payload;
       }
     } else {
@@ -83,7 +82,7 @@ String getDataFromAPI(char* jokeAPI) {
     return "";
   }
 }
-
+// extracts the joke from the json file
 String extractJoke(String json) {
   int start;
   int end;
@@ -103,7 +102,33 @@ String extractJoke(String json) {
   }
   else return json;
 }
-
+void loadBlankPage(WiFiClient client) {
+  client.println("<!DOCTYPE html><html data-bs-theme=\"light\" lang=\"en\">");
+  client.println("<head><meta charset=\"utf-8\">");
+  client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">");
+  client.println("<title>Joke template</title></head>");
+  client.println("<body style=\"background: #bbdaff;\"><p>");
+  client.println("</p></body></html>");
+  client.println();
+}
+void formHeader(WiFiClient client) {
+  // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+  client.println("HTTP/1.1 200 OK");
+  // and a content-type so the client knows what's coming, then a blank line:
+  client.println("Content-type:text/html");
+  client.println("Connection: close");
+  client.println();
+}
+void loadPage(WiFiClient client, String joke) {
+  client.println("<!DOCTYPE html><html data-bs-theme=\"light\" lang=\"en\">");
+  client.println("<head><meta charset=\"utf-8\">");
+  client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">");
+  client.println("<title>Joke template</title></head>");
+  client.println("<body style=\"background: #bbdaff;\"><p>");
+  client.println(joke);
+  client.println("</p></body></html>");
+  client.println();
+}
 void setup() {
   Serial.begin(9600);
   delay(1000);
@@ -113,18 +138,33 @@ void setup() {
   Serial.println("Setting up the button.");
   setUpButton(17);
   connectToWifi("Simona's Galaxy A51", "nnal8860");
-}
 
+}
 
 void loop() {
   int buttonState = HIGH;      // Initialize button state
   int lastButtonState = HIGH;  // Initialize last button state
   // Read the current state of the pushbutton
   buttonState = digitalRead(BUTTON_PIN);
-  // if the button is pressed and its previous state was HIGH
   if (buttonState == LOW && lastButtonState == HIGH) {  // Check if the button state has changed from HIGH to LOW (button pressed)
-    Serial.println("Button pressed and now fetching joke...");
-    delay(500);
-    Serial.println(extractJoke(getDataFromAPI(jokeAPI)));
+    WiFiClient client = server.available();   // Listen for incoming clients
+    // if there's a setup websocket, display the joke on the browser
+    if (client) {                             // If a new client connects,
+      Serial.println("New Client.");          // print a message out in the serial port
+      if (client.available()) {             // if there's bytes to read from the client,
+        char c = client.read();             // read a byte, then
+        Serial.write(c);                    // print it out the serial monitor
+        formHeader(client);
+        Serial.println("Button pressed and now fetching joke...");
+        delay(500);
+        String joke = extractJoke(getDataFromAPI(jokeAPI));
+        Serial.println(joke);
+        loadPage(client, joke);
+      }
+    // Close the connection
+    client.stop();
+    Serial.println("Client disconnected.");
+    Serial.println("");
+    }
   }
 }

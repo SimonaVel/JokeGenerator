@@ -13,11 +13,13 @@ WiFiServer server(80);
 // for the jokes
 char* jokeAPI = "https://v2.jokeapi.dev/joke/Any?safe-mode";
 
+
+// It sets up a button on the breadboard
 void setUpButton(int button_value = 17) {
   BUTTON_PIN = button_value;         // Define the pin for the pushbutton
   pinMode(BUTTON_PIN, INPUT_PULLUP);   // Initialize pushbutton pin as an input with internal pull-up resistor
 }
-
+// displays a message on a LCD
 void setUpDisplayMessage() {
   // set the LCD number of columns and rows
   int lcdColumns = 16;
@@ -32,12 +34,12 @@ void setUpDisplayMessage() {
   // set cursor to first column, first row
   lcd.setCursor(0, 0);
   // print message
-  lcd.print("Another joke?");
-  lcd.setCursor(0, 1);
   lcd.print("Press the button");
+  lcd.setCursor(0, 1);
+  lcd.print("   for a joke");
 }
 
-// Connect to Wi-Fi network with SSID and password
+// Connects to Wi-Fi network with SSID and password
 void connectToWifi(char* name, char* pass) {
   Serial.print("Connecting to ");
   Serial.println(name);
@@ -53,8 +55,8 @@ void connectToWifi(char* name, char* pass) {
   server.begin();
 }
 
-// fetching jokes:
-void getDataFromAPI(char* jokeAPI) {
+// Fetches json data from an API
+String getDataFromAPI(char* jokeAPI) {
   HTTPClient http;
   Serial.print("Sending HTTP GET request to API: ");
   Serial.println(jokeAPI);
@@ -68,15 +70,39 @@ void getDataFromAPI(char* jokeAPI) {
         // Example: Assuming the JSON response is {"type": "single", "joke": "This is a joke"}
         // You need to parse this JSON and extract the relevant data
         // Then, print or do whatever you want with the joke data
-        Serial.println(payload);
+        // Serial.println(payload);
+        return payload;
       }
     } else {
       Serial.printf("HTTP GET failed, error: %s\n", http.errorToString(httpCode).c_str());
+      return "";
     }
     http.end();
   } else {
     Serial.println("Unable to connect to server");
+    return "";
   }
+}
+
+// extracts the joke from the json file
+String extractJoke(String json) {
+  int start;
+  int end;
+  String extractedJoke;
+  if((start = json.indexOf("\"type\": \"twopart\"")) != -1) {
+    start = json.indexOf("\"setup\": \"") + 10;
+    end = json.indexOf("\"flags\": {") - 7;
+    extractedJoke = json.substring(start, end);
+    extractedJoke.replace("    \"delivery\": \"", "");
+    extractedJoke.replace("\",", "");
+    return extractedJoke;
+  }
+  else if(json.indexOf("\"type\": \"single\"") != -1) {
+    start = json.indexOf("\"joke\": \"") + 9;
+    end = json.indexOf("\"flags\"") - 7;
+    return json.substring(start, end);
+  }
+  else return json;
 }
 
 void setup() {
@@ -99,6 +125,6 @@ void loop() {
   if (buttonState == LOW && lastButtonState == HIGH) {  // Check if the button state has changed from HIGH to LOW (button pressed)
     Serial.println("Button pressed and now fetching joke...");
     delay(500);
-    getDataFromAPI(jokeAPI);
+    Serial.println(extractJoke(getDataFromAPI(jokeAPI)));
   }
 }
