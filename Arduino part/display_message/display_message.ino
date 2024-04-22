@@ -106,8 +106,8 @@ void loadBlankPage(WiFiClient client) {
   client.println("<!DOCTYPE html><html data-bs-theme=\"light\" lang=\"en\">");
   client.println("<head><meta charset=\"utf-8\">");
   client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">");
-  client.println("<title>Joke template</title></head>");
-  client.println("<body style=\"background: #bbdaff;\"><p>");
+  client.println("<title>Joke generator!</title></head>");
+  client.println("<body style=\"background: #bbdaff;\"><p style=\"font-size: 20px;\">");
   client.println("</p></body></html>");
   client.println();
 }
@@ -123,8 +123,8 @@ void loadPage(WiFiClient client, String joke) {
   client.println("<!DOCTYPE html><html data-bs-theme=\"light\" lang=\"en\">");
   client.println("<head><meta charset=\"utf-8\">");
   client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">");
-  client.println("<title>Joke template</title></head>");
-  client.println("<body style=\"background: #bbdaff;\"><p>");
+  client.println("<title>Joke generator!</title></head>");
+  client.println("<body style=\"background: #bbdaff;\"><p style=\"font-size: 20px; font-family: 'Courier New', monospace; font-weight: bold; color: #660033; text-align: center;\">");
   client.println(joke);
   client.println("</p></body></html>");
   client.println();
@@ -156,7 +156,7 @@ void loop() {
         Serial.write(c);                    // print it out the serial monitor
         formHeader(client);
         Serial.println("Button pressed and now fetching joke...");
-        delay(500);
+        delay(250);
         String joke = extractJoke(getDataFromAPI(jokeAPI));
         Serial.println(joke);
         loadPage(client, joke);
