@@ -14,19 +14,19 @@ This project was created in the spring of 2024 for an Interactive Digital system
 
 ## How to set this project up:
 I. Hardware part
-    1. Connect the parts as follows:
+    1. Connect the parts as follows:\
     ![image](https://github.com/pren0Sima/JokeGenerator/assets/108150997/96825c4c-3eb1-407b-a098-a7b4e84b0486)
 
-II. Software part
-    1. Download the code
-    2. Create a hotspot
-    3. Change the credentials in the program with yours
-    4. Upload the code onto the ESP23 using an Arduino IDE
+II. Software part\
+    1. Download the code\
+    2. Create a hotspot\
+    3. Change the credentials in the program with yours\
+    4. Upload the code onto the ESP23 using an Arduino IDE\
     5. Copy the IP address in the Serial monitor screen and paste it into a browser
 
-III. Human part
-    1. Refresh the page
-    2. Press the button
+III. Human part\
+    1. Refresh the page\
+    2. Press the button\
     3. Laugh!
 
 ### Known issues:
