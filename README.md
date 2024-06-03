@@ -4,7 +4,7 @@
 
 This project was created in the spring of 2024 for an Interactive Digital systems course at Roskilde university. The aim was to create a project that uses at least 2 novel inputs and/or networking. The program includes both.
 
-## Hardware needed:
+### Hardware needed:
 1. ESP32 microcontroller
 2. USB cable
 3. Breadboard
@@ -29,12 +29,12 @@ III. Human part
     2. Press the button
     3. Laugh!
 
-## Known issues:
+### Known issues:
 1. The formatting of the jokes is sometimes funny.
 2. Unsecure
 3. The refresh button has to be pressed every time before pressing the button in order for a joke to be displayed.
 
-## Credits:
+### Credits:
 This project was made possible with the kind assistance of Keith Lim (keithl@ruc.dk) and the following tutorial websites:
 1) https://randomnerdtutorials.com/ 
 2) https://learn.hobye.dk/
