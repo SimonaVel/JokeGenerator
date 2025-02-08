@@ -7,7 +7,7 @@
 ![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white) <br>
 ![image](https://github.com/user-attachments/assets/4b36c0a8-030f-408d-8578-634d495d99b5)
 
-## An interactive joke generator with a physical button for going to the next joke.
+## An interactive joke generator with a physical button.
 
 This project was created in the spring of 2024 for an Interactive Digital systems course at Roskilde university. The aim was to create a project that uses at least 2 novel inputs and/or networking. The program includes both.
 
